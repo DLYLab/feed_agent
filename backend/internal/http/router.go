@@ -57,15 +57,15 @@ func SetRouter(db *gorm.DB, cache *rediscache.Client, rmq *rabbitmq.RabbitMQ) *g
 	// 账户安全相关限流（基于IP）：
 	// - 登录限流：每分钟最多10次，防止暴力破解密码
 	// - 注册限流：每小时最多5次，防止恶意注册大量账号
-	loginLimiter := ratelimit.Limit(cache, "account_login", 3, time.Minute, ratelimit.KeyByIP) // redis key : feedsystem:ratelimit:account_login:ip
-	registerLimiter := ratelimit.Limit(cache, "account_register", 5, time.Hour, ratelimit.KeyByIP)
+	loginLimiter := ratelimit.Limit(cache, "account_login", 30, time.Minute, ratelimit.KeyByIP) // redis key : feedsystem:ratelimit:account_login:ip
+	registerLimiter := ratelimit.Limit(cache, "account_register", 50, time.Hour, ratelimit.KeyByIP)
 
 	// 业务操作限流（基于账号ID）：
 	// - 点赞限流：每分钟最多30次，防止刷赞
 	// - 评论限流：每分钟最多10次，防止刷评论
 	// - 关注限流：每分钟最多20次，防止恶意关注/取关
 	likeLimiter := ratelimit.Limit(cache, "like_write", 30, time.Minute, ratelimit.KeyByAccount) // redis key : feedsystem:ratelimit:like_write:account_id
-	commentLimiter := ratelimit.Limit(cache, "comment_write", 10, time.Minute, ratelimit.KeyByAccount)
+	commentLimiter := ratelimit.Limit(cache, "comment_write", 100, time.Minute, ratelimit.KeyByAccount)
 	socialLimiter := ratelimit.Limit(cache, "social_write", 20, time.Minute, ratelimit.KeyByAccount)
 
 	// ============================================================================
